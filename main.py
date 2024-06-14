@@ -8,17 +8,17 @@ import pytz
 # URL страницы новостного сайта РИА Новости
 url = "https://ria.ru/lenta/"
 
-# Получаем текущее время
+# Получаем текущее время с учетом часового пояса
 current_time = datetime.now(tz=pytz.timezone('Europe/Moscow'))
 
 # Форматируем время без смещения от UTC
 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-# Выводим время
+# Выводим время на экран
 print(formatted_time)
 
-#Создаем множество для хранения уже обработанных ссылок
-unique_links = ['link1', 'link2', 'link3']
+#Создаем множество для хранения уже обработанных ссылок для исключения дубликатов
+unique_links = []
 processed_links = set()
 
 # Функция для парсинга ссылок на статьи
@@ -44,32 +44,31 @@ s = soup.find('title').text
 
 # Выводим заголовок страницы на экран
 print(s, ':')
-print('*****')
+print('*******')
 
-#Устанавливаем скрипт с интервалом 10 минут продолжительностью 4 часа
+#Устанавливаем скрипт с интервалом 5 минут продолжительностью 4 часа
 start_time = time.time()
 duration = 14400  # продолжительность 4 часа
 interval = 300  # интервал 5 минут
 
-#Функция для проверки статьи на упоминание
+#Проверяем статьи на упоминание ключевых слов
 def check_article(url):
     html = get_html(url)
     soup = BeautifulSoup(html, 'html.parser')
 
-    title_tag = soup.find('div', class_=re.compile(r'article__title'))
-    summary_tag = soup.find('h1', class_=re.compile(r'article__second-title'))
-    author_tag = soup.find('a', class_=re.compile(r'color-font-hover-only'))
-    time_tag = soup.find('a', string=re.compile(r'\d{2}:\d{2} \d{2}.\d{2}.\d{4}'))
+    all_title = soup.find('div', class_=re.compile(r'article__title'))
+    all_summary = soup.find('h1', class_=re.compile(r'article__second-title'))
+    all_author = soup.find('a', class_=re.compile(r'color-font-hover-only'))
+    all_time = soup.find('a', string=re.compile(r'\d{2}:\d{2} \d{2}.\d{2}.\d{4}'))
+    title = all_title.text.strip() if all_title else 'Не найден'
+    summary = all_summary.text.strip() if all_summary else 'Не найдена'
+    author = all_author.text.strip() if all_author else 'Не найден'
+    time = all_time.text.strip() if all_time else 'Не найдено'
 
-    title = title_tag.text.strip() if title_tag else 'Не найден'
-    summary = summary_tag.text.strip() if summary_tag else 'Не найдена'
-    author = author_tag.text.strip() if author_tag else 'Не найден'
-    time = time_tag.text.strip() if time_tag else 'Не найдено'
+    all_content = soup.find_all('div', class_=re.compile(r'article__text'))
+    content = ' '.join([div.text for div in all_content])
 
-    content_tags = soup.find_all('div', class_=re.compile(r'article__text'))
-    content = ' '.join([div.text for div in content_tags])
-
-    keywords = [  r'Байден\w+', r'Трамп\w+' ]      
+    keywords = [  r'Путин\w+', r'Трамп\w+' ]      
 
     if any(re.search(keyword, content, re.IGNORECASE) for keyword in keywords):
         print(f"Заголовок статьи: {title}")
@@ -77,8 +76,9 @@ def check_article(url):
         print(f"Автор: {author}")
         print(f"Время выхода статьи: {time}")
         #print(content)
-        print('*****')
-
+        print('*******')
+        
+# Функция для вывода черты после каждого цикла поиска
 def print_divider():
     print("-" * 80)
    
@@ -88,7 +88,7 @@ while time.time() - start_time < duration:
     links = parse_links(html)
     for link in links:
         check_article(link)
-        # Функция для вывода черты после каждого цикла поиска
+        # Выводим черту после каждого цикла поиска
     print_divider()
         
     time.sleep(interval)
