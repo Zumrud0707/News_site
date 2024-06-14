@@ -68,7 +68,7 @@ def check_article(url):
     all_content = soup.find_all('div', class_=re.compile(r'article__text'))
     content = ' '.join([div.text for div in all_content])
 
-    keywords = [  r'Путин\w+', r'Трамп\w+' ]      
+    keywords = [  r'Байден\w+', r'Трамп\w+' ]      
 
     if any(re.search(keyword, content, re.IGNORECASE) for keyword in keywords):
         print(f"Заголовок статьи: {title}")
