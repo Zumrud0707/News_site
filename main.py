@@ -68,7 +68,7 @@ def check_article(url):
     all_content = soup.find_all('div', class_=re.compile(r'article__text'))
     content = ' '.join([div.text for div in all_content])
 
-    keywords = [  r'Байден\w+', r'Трамп\w+' ]      
+    keywords = [  r'Путин\w+', r'Байден\w+' ]      
 
     if any(re.search(keyword, content, re.IGNORECASE) for keyword in keywords):
         print(f"Заголовок статьи: {title}")
@@ -77,11 +77,11 @@ def check_article(url):
         print(f"Время выхода статьи: {time}")
         #print(content)
         print('*******')
-        
+
 # Функция для вывода черты после каждого цикла поиска
 def print_divider():
     print("-" * 80)
-   
+
 while time.time() - start_time < duration:
     html = get_html(url)
     # Обновляем список ссылок на статьи внутри цикла while
@@ -90,7 +90,7 @@ while time.time() - start_time < duration:
         check_article(link)
         # Выводим черту после каждого цикла поиска
     print_divider()
-        
+
     time.sleep(interval)
     if time.time() - start_time >= duration:
         print("Период в 4 часа истек.")
